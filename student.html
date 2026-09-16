@@ -3,5 +3,51 @@ const p=new URLSearchParams(location.search),room=p.get('room'),group=Number(p.g
 function configured(){return window.FIREBASE_CONFIG && !String(window.FIREBASE_CONFIG.apiKey||'').includes('請貼上')}
 if(!configured()){document.getElementById('warn').style.display='block';document.getElementById('msg').textContent='請老師先完成 Firebase 設定'}else if(!room||group<1||group>5){document.getElementById('msg').textContent='QR Code 連結不正確'}else{firebase.initializeApp(window.FIREBASE_CONFIG);ref=firebase.database().ref('monopolyRooms/'+room);ref.on('value',s=>{state=s.val();update()})}
 function update(){let btn=document.getElementById('roll'),msg=document.getElementById('msg');if(!state){btn.disabled=true;msg.textContent='等待老師開啟遊戲'}else if(state.awaiting){btn.disabled=true;msg.textContent='老師正在判定上一題'}else if(state.turn!==group-1){btn.disabled=true;msg.textContent=`現在輪到第${state.turn+1}組`}else{btn.disabled=false;msg.textContent='輪到你們了！請擲骰 🎲'}}
-document.getElementById('roll').onclick=async()=>{if(!state||state.turn!==group-1||state.awaiting||rolling)return;rolling=true;let btn=document.getElementById('roll');btn.disabled=true;let n=1;for(let i=0;i<10;i++){n=1+Math.floor(Math.random()*6);document.getElementById('dice').textContent=chars[n-1];await new Promise(r=>setTimeout(r,70+i*8))}document.getElementById('msg').textContent=`擲到 ${n} 點！`;await ref.update({lastRoll:n,lastGroup:group-1,rollSeq:(state.rollSeq||0)+1});rolling=false}
-</script></body></html>
+document.getElementById('roll').onclick=async()=>{
+  if(!state || state.turn!==group-1 || state.awaiting || rolling) return;
+
+  rolling=true;
+  const btn=document.getElementById('roll');
+  btn.disabled=true;
+
+  // 先向 Firebase 搶本回合的擲骰權
+  const lock=await ref.transaction(current=>{
+    if(!current) return;
+
+    // 只有目前輪到的組，而且尚未有人擲骰，才能取得鎖
+    if(current.turn!==group-1 || current.awaiting){
+      return;
+    }
+
+    current.awaiting=true;
+    return current;
+  });
+
+  // 沒搶到：代表另一支手機已經先擲了
+  if(!lock.committed){
+    rolling=false;
+    document.getElementById('msg').textContent='本回合已由其他同學擲骰';
+    return;
+  }
+
+  // 搶到後才真正擲骰
+  let n=1;
+  for(let i=0;i<10;i++){
+    n=1+Math.floor(Math.random()*6);
+    document.getElementById('dice').textContent=chars[n-1];
+    await new Promise(r=>setTimeout(r,70+i*8));
+  }
+
+  document.getElementById('msg').textContent=`擲到 ${n} 點！`;
+
+  await ref.update({
+    lastRoll:n,
+    lastGroup:group-1,
+    rollSeq:(state.rollSeq||0)+1
+  });
+
+  rolling=false;
+}
+  </script>
+</body>
+</html>
