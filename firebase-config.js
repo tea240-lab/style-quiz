@@ -1,5 +1,5 @@
 // Firebase 設定
-const firebaseConfig = {
+window.FIREBASE_CONFIG = {
   apiKey: "AIzaSyByP8AR7RecUcPLJZdB3wKVKYMFHzXs0Xs",
   authDomain: "style-monopoly.firebaseapp.com",
   databaseURL: "https://style-monopoly-default-rtdb.firebaseio.com",
