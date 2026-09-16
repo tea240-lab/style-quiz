@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>我的穿衣風格測驗</title>
+<style>
+:root{--navy:#123a78;--blue:#3279db;--bg:#f7fbff;--card:#fff;--line:#d9e9fa;--pink:#ff7fa7;--shadow:0 10px 28px rgba(26,69,122,.12)}
+*{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,"Noto Sans TC","Microsoft JhengHei",sans-serif;background:linear-gradient(135deg,#f7fbff,#fff8fb);color:#17345e}
+.app{max-width:900px;margin:auto;padding:18px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.brand{font-weight:900;font-size:clamp(24px,5vw,38px);color:var(--navy)}.counter{font-weight:800;color:#53739c}.progress{height:12px;background:#e9f2fb;border-radius:999px;overflow:hidden;margin:10px 0 22px}.bar{height:100%;width:0;background:linear-gradient(90deg,#66b7ff,#ff8fb3);transition:.25s}
+.card{background:var(--card);border:2px solid var(--line);border-radius:24px;padding:clamp(18px,4vw,34px);box-shadow:var(--shadow)}.qnum{display:inline-flex;align-items:center;justify-content:center;width:70px;height:70px;border-radius:50%;background:#eaf4ff;color:#1768c8;font-weight:1000;font-size:28px}.question{font-size:clamp(22px,4vw,32px);font-weight:900;line-height:1.45;margin:18px 0}.choices{display:grid;grid-template-columns:1fr 1fr;gap:13px}.choice{border:2px solid #dbe8f5;background:#fff;border-radius:18px;padding:16px;text-align:left;font-size:18px;line-height:1.45;cursor:pointer;transition:.18s;display:flex;gap:12px;align-items:flex-start}.choice:hover{transform:translateY(-2px);border-color:#8bc3f5}.choice.selected{border-color:#3f8de0;background:#edf7ff;box-shadow:0 0 0 3px rgba(63,141,224,.12)}.letter{flex:0 0 36px;height:36px;border-radius:12px;background:#edf3fb;color:#1768c8;display:flex;align-items:center;justify-content:center;font-weight:1000}.selected .letter{background:#1768c8;color:#fff}
+.actions{display:flex;justify-content:space-between;gap:12px;margin-top:22px}.btn{border:0;border-radius:14px;padding:13px 22px;font-size:17px;font-weight:900;cursor:pointer}.secondary{background:#edf2f7;color:#536a85}.primary{background:#1768c8;color:#fff}.primary:disabled{opacity:.4;cursor:not-allowed}.intro{text-align:center;padding:26px 10px}.intro .emoji{font-size:62px}.intro h1{font-size:clamp(30px,6vw,48px);margin:8px;color:var(--navy)}.intro p{font-size:18px;line-height:1.8;max-width:650px;margin:16px auto}.result{text-align:center}.result h2{font-size:32px;color:var(--navy)}.result .big{font-size:42px;font-weight:1000;margin:8px 0}.result .sub{font-size:22px;font-weight:800;color:#567}.resultbox{margin:24px auto;text-align:left;max-width:650px;background:#f7fbff;border-radius:20px;padding:20px;border:2px solid #dbeafa}.bars{margin-top:20px}.row{display:grid;grid-template-columns:110px 1fr 38px;gap:10px;align-items:center;margin:10px 0}.mini{height:12px;background:#e8eef5;border-radius:99px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,#5da8ef,#ff8caf)}.note{font-size:14px;color:#6a7d93;margin-top:18px}.hidden{display:none!important}@media(max-width:650px){.choices{grid-template-columns:1fr}.row{grid-template-columns:90px 1fr 30px}.choice{font-size:16px}.qnum{width:58px;height:58px}}
+</style>
+</head>
+<body><main class="app">
+<section id="intro" class="card intro"><div class="emoji">👗✨</div><h1>我的穿衣風格測驗</h1><p>每題選出「最像你」或「你最喜歡」的一個答案。沒有標準答案，不要想哪個比較好，選你真正會做的就好！</p><button class="btn primary" id="start">開始測驗</button></section>
+<section id="quiz" class="hidden"><div class="top"><div class="brand">👗 我的穿衣風格測驗</div><div class="counter" id="counter"></div></div><div class="progress"><div class="bar" id="bar"></div></div><div class="card"><div class="qnum" id="qnum"></div><div class="question" id="question"></div><div class="choices" id="choices"></div><div class="actions"><button class="btn secondary" id="prev">上一題</button><button class="btn primary" id="next" disabled>下一題</button></div></div></section>
+<section id="result" class="card result hidden"></section>
+</main>
+<script>
+const questions=[
+["明天是假日，要和朋友出去玩，你打開衣櫃最可能怎麼選？",["找一件有特色的上衣，再搭最近流行的單品","選舒服、方便走動的一套就好","選顏色柔和、看起來可愛又有小巧思的衣服","選簡單素色、上下搭起來很乾淨的一套","選寬鬆上衣、寬褲，再搭一雙有型的鞋","選襯衫、針織衫或看起來整齊有精神的服裝"]],
+["如果家人送你一張服飾店禮券，你最想買哪一類？",["剪裁簡單、很好搭配的基本款","有設計感、最近很受歡迎的單品","帽T、T恤、牛仔褲等平常常穿的衣服","有可愛圖案、柔和色彩或小裝飾的衣服","襯衫、POLO衫、針織背心等整齊的單品","Oversize上衣、工裝褲或有街頭感的單品"]],
+["你買衣服時，通常最容易被什麼吸引？",["這件看起來很舒服，我一定常穿。","這個設計很特別，穿出去應該很吸睛。","這個顏色／圖案好可愛！","這件很有型，搭球鞋一定很好看。","簡單又好搭，應該不容易退流行。","穿起來很整齊，看起來很有精神。"]],
+["如果學校舉辦可以穿便服的活動，你最希望自己給人的感覺是？",["自然、輕鬆、好相處","乾淨、簡單、舒服耐看","有型、有自己的態度","斯文、有精神、有氣質","可愛、親切、有活力","有特色，讓人覺得今天穿得很不一樣"]],
+["以下哪一雙鞋最容易成為你的第一選擇？",["簡單、沒有太多裝飾的小白鞋","有特色或目前流行的鞋款","帆布鞋、一般運動鞋","厚底鞋、潮流球鞋","樂福鞋、簡潔皮鞋或學院感鞋款","顏色可愛或有小裝飾的鞋款"]],
+["如果只能選一件外套，你比較想留下哪件？",["牛仔外套或舒服的連帽外套","剪裁簡單、沒有太多圖案的外套","棒球外套或寬鬆、有街頭感的外套","有特殊剪裁、材質或設計的外套","針織外套或整齊俐落的外套","顏色柔和、有小圖案或可愛細節的外套"]],
+["如果要挑一個包包，你比較可能選哪一個？",["實用、容量夠大的後背包或側背包","造型特殊、很有設計感的包","小巧、顏色柔和或有可愛吊飾的包","素色、沒有明顯圖案的簡單包款","有品牌感、街頭元素的斜背包","方正、整齊，看起來比較有質感的包"]],
+["今天時間很趕，只有3分鐘可以決定穿什麼，你最可能？",["拿平常最舒服、最常穿的那一套","用幾件基本款快速搭出乾淨的造型","還是會想辦法加一件有特色的單品","選寬鬆上衣＋寬褲，快速完成","找一套配色柔和、看起來可愛的搭配","選看起來整齊、有精神、不容易出錯的搭配"]],
+["看到同學穿了一件最近非常流行的新款衣服，你最可能怎麼想？",["如果好穿、好活動，我也會考慮。","好酷！如果適合我，我也想試試看。","我還是比較喜歡簡單、不容易退流行的。","如果有可愛一點的款式，我會比較喜歡。","我比較喜歡有街頭感、有態度的搭法。","如果搭得整齊、有質感，我會想嘗試。"]],
+["如果今天穿的衣服只能增加一樣配件，你會選？",["棒球帽或有型的項鍊","簡單的手錶或小飾品","可愛髮飾、小吊飾或精緻飾品","實用的帽子或簡單配件","有設計感、能讓整套衣服變亮眼的配件","皮帶、手錶等讓造型更整齊的配件"]],
+["如果要拍一張「最能代表自己」的照片，你希望穿得怎麼樣？",["簡單舒服，就像平常的自己","乾淨俐落，不需要太多裝飾","酷一點、有個性、有街頭感","柔和可愛，看起來有親和力","整齊、有精神、有一點知性感","特別、有造型感，讓人留下印象"]],
+["如果有人稱讚你的穿搭，你最希望聽到哪一句？",["你這套看起來很舒服又自然！","你的衣服都很簡單，但搭起來很好看。","你今天超有型，很有自己的風格！","這套好可愛，很適合你！","你今天看起來很有精神、很有氣質。","你這樣搭好特別，我完全沒想到可以這樣穿！"]]
+];
+const types=["休閒風","街頭風","簡約風","甜美／可愛風","學院／知性風","時尚個性風"];
+// each row: type index -> answer letter index
+const key=[
+[1,4,3,2,5,0],[2,5,0,3,4,1],[0,3,4,2,5,1],[0,2,1,4,3,5],[2,3,0,5,4,1],[0,2,1,5,4,3],[0,4,3,2,5,1],[0,3,1,4,5,2],[0,4,2,3,5,1],[3,0,1,2,5,4],[0,2,1,3,4,5],[0,2,1,3,4,5]
+];
+const desc={"休閒風":"重視舒服、自在與實穿，喜歡自然、不費力的搭配。","街頭風":"偏好寬鬆、有型與帶態度的單品，喜歡展現個性。","簡約風":"喜歡素色、乾淨線條與好搭配的基本款，耐看不複雜。","甜美／可愛風":"喜歡柔和色彩、可愛圖案與精緻小細節，整體親切有活力。","學院／知性風":"喜歡整齊、有精神與質感的搭配，偏好襯衫、針織與俐落單品。","時尚個性風":"容易被流行、特色設計與亮眼搭配吸引，喜歡穿出與眾不同。"};
+let cur=0, answers=Array(12).fill(null);
+const $=id=>document.getElementById(id);
+function render(){
+ $('counter').textContent=`第 ${cur+1} 題／共 12 題`; $('bar').style.width=`${cur/12*100}%`; $('qnum').textContent=`Q${cur+1}`; $('question').textContent=questions[cur][0];
+ $('choices').innerHTML=''; questions[cur][1].forEach((t,i)=>{let b=document.createElement('button');b.className='choice'+(answers[cur]===i?' selected':'');b.innerHTML=`<span class="letter">${'ABCDEF'[i]}</span><span>${t}</span>`;b.onclick=()=>{answers[cur]=i;render()};$('choices').appendChild(b)});
+ $('prev').style.visibility=cur===0?'hidden':'visible'; $('next').disabled=answers[cur]===null; $('next').textContent=cur===11?'看結果':'下一題';
+}
+function showResult(){
+ let scores=Array(6).fill(0); answers.forEach((ans,q)=>{key[q].forEach((letterIdx,typeIdx)=>{if(ans===letterIdx)scores[typeIdx]++})});
+ let order=[0,1,2,3,4,5].sort((a,b)=>scores[b]-scores[a]); let max=scores[order[0]], winners=order.filter(i=>scores[i]===max); let primary=winners.map(i=>types[i]).join(' × '); let second=order.find(i=>scores[i]<max); let secondText=second!==undefined?types[second]:'並列';
+ let explanation=winners.map(i=>desc[types[i]]).join(' ');
+ $('quiz').classList.add('hidden'); $('result').classList.remove('hidden');
+ $('result').innerHTML=`<div style="font-size:58px">🎉</div><h2>你的穿衣風格結果</h2><div class="big">${primary}</div><div class="sub">${winners.length===1?'次要傾向：'+secondText:'你有多種同樣明顯的風格傾向'}</div><div class="resultbox"><b>你的風格特色：</b><p>${explanation}</p><div class="bars">${types.map((t,i)=>`<div class="row"><b>${t}</b><div class="mini"><div class="fill" style="width:${scores[i]/12*100}%"></div></div><b>${scores[i]}</b></div>`).join('')}</div><div class="note">這是穿衣偏好探索，不是固定標籤；你的風格也可能隨場合、心情與成長而改變。</div></div><button class="btn primary" onclick="restart()">再測一次</button>`;
+}
+function restart(){cur=0;answers.fill(null);$('result').classList.add('hidden');$('intro').classList.remove('hidden')}
+$('start').onclick=()=>{$('intro').classList.add('hidden');$('quiz').classList.remove('hidden');render()};
+$('prev').onclick=()=>{if(cur>0){cur--;render()}};
+$('next').onclick=()=>{if(answers[cur]===null)return;if(cur<11){cur++;render()}else showResult()};
+</script></body></html>
